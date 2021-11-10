@@ -48,6 +48,7 @@ function setup() { "use strict";
 	var distanceBetweenGrass = 100; // distance between each grass
 	var distanceChanged = 15; // distance between movement of the grasses
 	var speedOfGrass = 450; // speed of movement of grasses
+	var tempGrassX = startingGrassX;
 
 	// Sun and moon variables
 	var sunMoonAnimatorTracker = null;
@@ -79,6 +80,47 @@ function setup() { "use strict";
 	var rightWingToOuterJointRotation = rightWingToInnerJointRotation + innerAndOuterWingFlex;
 
 
+	// Trajectory of Alien target
+	var Hermite = function(t){
+		return[
+			2*t*t*t-3*t*t+1,
+			t*t*t-2*t*t+t,
+			-2*t*t*t+3*t*t,
+			t*t*t-t*t
+		]
+	}
+
+	function Cubic(basis, P, t){
+		var b = basis(t);
+		var result = vec2.create();
+		vec2.scale(result, P[0], b[0]);
+		vec2.scaleAndAdd(result, result, P[1], b[1]);
+		vec2.scaleAndAdd(result, result, P[2], b[2]);
+		vec2.scaleAndAdd(result, result, P[3], b[3]);
+		return result;
+	}
+
+	// P of connected Hermite cubics
+	// Point and tangent 0
+	var p0 = [0,0];
+	var d0 = [1,3];
+
+	// Point and tangent 1
+	var p1 = [1,1];
+	var d1 = [-1, 3];
+
+	// Point and tangent 2
+	var p2 = [2, 2];
+	var d2 = [0, 3];
+
+
+	var P0 = [p0, d0, p1, d1];
+	var P1 = [p1, d1, p2, d2];
+
+	var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
+	var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
+
+
 	// This function defines a drawings on the canvas
   	function draw() {
     		var context = canvas.getContext('2d');
@@ -88,11 +130,28 @@ function setup() { "use strict";
     		var dx = sliderX.value;
     		var dy = sliderY.value;
 
+		context.save();
 		context.translate(50,0);
+
+		// This function draw alien trajectory
+		function DrawAlienTrajectory(t_begin, t_end, intervals, C){
+			context.save();
+			context.strokeStyle = "black";
+			context.beginPath();
+			context.moveTo(Curve1(t_begin));
+			for(var i=1; i<= intervals; i++){
+				var t = ((intervals-i)/ intervals) * t_begin+ (i/ intervals)* t_end;
+				context.lineTo(C(t));
+			}
+
+			context.stroke();
+			context.restore();
+		}
     
 		// This function draws sling shot
-    		function DrawSlingShot() {
-      			// sling handle
+		function DrawSlingShot() {
+			// sling handle
+			context.save();
 			context.fillStyle = "red";
 			context.fillRect(80, 235 + ((55-35)/2), 7, 50);
 			context.strokeRect(80, 235 + ((55-35)/2), 7, 50);
@@ -120,10 +179,12 @@ function setup() { "use strict";
 			context.stroke();
 			context.fillStyle = "red";
 			context.fill();
-    		}
+			context.restore();
+		}
    
 		// This function draws string of sling shot
    		function DrawSling() {
+			context.save();
       		context.strokeStyle= "black";
       		context.beginPath();
 			context.moveTo(80, 203); //fixed 
@@ -134,6 +195,7 @@ function setup() { "use strict";
 			context.lineTo(75, 218); // fixed
       
       		context.stroke();
+			context.restore();
      	}
 		
 		// This function draws ground where sling shot stands
@@ -149,6 +211,8 @@ function setup() { "use strict";
 
 		// This function draws the rock
 		function DrawRock(){
+
+			context.save();
 			context.beginPath();
 
 			if(isReleased ==false){
@@ -161,6 +225,7 @@ function setup() { "use strict";
 			context.stroke();
 			context.fillStyle = "grey";
 			context.fill();
+			context.restore();
 		}
 
 		// This function draws aim assist for the sling shot
@@ -222,14 +287,14 @@ function setup() { "use strict";
 			context.arc(startingGrassX + 30, startingGrassY, heightOfRightBush, 0, 2* Math.PI );
 			
 			// Draws the remaining bushe(s)
+			tempGrassX = startingGrassX;
 			for(var i = 0; i< numberOfGrassToTheRight; i++){
-				startingGrassX = startingGrassX + distanceBetweenGrass;
-				context.arc(startingGrassX, startingGrassY, heightOfLeftBush, 0, 2 * Math.PI);
-				context.arc(startingGrassX + 30, startingGrassY, heightOfRightBush, 0, 2* Math.PI);
+				tempGrassX = tempGrassX + distanceBetweenGrass;
+				context.arc(tempGrassX, startingGrassY, heightOfLeftBush, 0, 2 * Math.PI);
+				context.arc(tempGrassX + 30, startingGrassY, heightOfRightBush, 0, 2* Math.PI);
 				
 			}
 
-			startingGrassX = originalStartingGrassX; // Reset the position of the bush to create windy effect
 			context.fill();
 			context.restore();	
 		}
@@ -475,9 +540,10 @@ function setup() { "use strict";
 				clearInterval(targetAnimatorTracker);
 				clearInterval(updateAnimatorTracker);
 				clearInterval(rockAnimatorTracker);
+
 				context.save();
 				context.translate(-50, 0);
-				context.fillStyle = ""
+				context.fillStyle = "black";
 				context.font = '70px serif';
 				context.fillText('LEVEL CLEARED! \nScore: 10/10', 10, 90);
 				context.restore();
@@ -492,6 +558,7 @@ function setup() { "use strict";
 		context.save();
 		
 		dayNightChanger();
+		DrawAlienTrajectory(0.0, 1.0, 100, Curve1);
 		// Checks if loading screen text should be drawn
 		if(isReleased == false){
 			DrawLoadingScreen();
@@ -508,7 +575,9 @@ function setup() { "use strict";
 		context.restore();
     
   	}
-	
+
+
+
 	// Animations
 	
 	// This function animates the position of the target
@@ -552,6 +621,11 @@ function setup() { "use strict";
 		// Updates the position of all grasses
 		distanceChanged = distanceChanged * -1;
 		startingGrassX = startingGrassX + distanceChanged;
+
+		if(rockPosX >=600 || rockPosX <= -50 || rockPosY >= 279){
+
+			clearInterval(grassAnimatorTracker);
+		}
 		
 	}
 
@@ -646,7 +720,7 @@ function setup() { "use strict";
 	// Lines that are commented means it has 
 	// its own rendering speed, which is different from what is defined here
 	function callAllAnimators(){
-		grassAnimator();
+		//grassAnimator();
 		sunAndMoonAnimator();
 		//targetAnimator();
 
@@ -656,7 +730,6 @@ function setup() { "use strict";
 			clearInterval(updateAnimatorTracker);
 		}
 
-		
 	}
   	
  	
@@ -669,7 +742,7 @@ function setup() { "use strict";
 	sliderX.addEventListener("input", empty); // Slider that reflects the X position of sling string
   	sliderY.addEventListener("input", empty); // Slider that reflects the Y position of sling string
 	slingButton.addEventListener("click", slingRelease); // Button that fires the sling		
-	//grassAnimatorTracker = setInterval(grassAnimator, speedOfGrass); // Starts grass animator 
+	grassAnimatorTracker = setInterval(grassAnimator, speedOfGrass); // Starts grass animator 
 	//sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
 
