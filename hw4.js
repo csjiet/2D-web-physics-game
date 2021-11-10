@@ -273,7 +273,7 @@ function setup() { "use strict";
 		// This function draw alien trajectory
 		function DrawBoomerangTrajectory(t_begin, t_end, intervals, C){
 			context.save();
-			context.strokeStyle = "black";
+			context.strokeStyle = "rgb(115, 147, 179)";
 			context.beginPath();
 			context.moveTo(C(t_begin)[0], C(t_begin)[1]);
 			for(var i=1; i<= intervals; i++){
@@ -401,8 +401,9 @@ function setup() { "use strict";
 		function DrawLoadingScreen(){
 			
 			context.save();
-			context.font = context.font = '50px serif';
-			context.fillText('Press \'Sling!\' to launch!', 10, 90);
+			context.translate(-50+17, 0);
+			context.font = context.font = '30px serif';
+			context.fillText('Press \'Sling!\' OR \'Fire Boomerang!\' to launch!', 10, 90);
 			context.restore();
 		}
 
@@ -687,6 +688,21 @@ function setup() { "use strict";
 
 			}
 
+			// Checks if the position of the BOOMERANG collides with the position of the target
+			if((targetPosX - 20 <= boomerangPosX && targetPosX + 20 >= boomerangPosX) && (targetPosY - 20 <= boomerangPosY && targetPosY + 20 >= boomerangPosY)){
+				clearInterval(targetAnimatorTracker);
+				clearInterval(updateAnimatorTracker);
+				clearInterval(rockAnimatorTracker);
+
+				context.save();
+				context.translate(-50, 0);
+				context.fillStyle = "black";
+				context.font = '70px serif';
+				context.fillText('LEVEL CLEARED! \nScore: 10/10', 10, 90);
+				context.restore();
+
+			}
+
 		}
 
 		
@@ -706,7 +722,7 @@ function setup() { "use strict";
 			}
 	  	}
 		// Checks if loading screen text should be drawn
-		if(isReleased == false){
+		if(isReleased == false && fireButtonState == false){
 			DrawLoadingScreen();
 		}
 		
