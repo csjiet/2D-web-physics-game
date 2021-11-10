@@ -79,6 +79,13 @@ function setup() { "use strict";
 	var rightWingToInnerJointRotation = 0;
 	var rightWingToOuterJointRotation = rightWingToInnerJointRotation + innerAndOuterWingFlex;
 
+	// Boomerang variables
+	var numberOfHermiteCurves = 5;
+
+	// Alien varibles
+	var alienStartPosX = 0;
+	var alienStartPosY = 0;
+
 
 	// Trajectory of Alien target
 	var Hermite = function(t){
@@ -113,6 +120,27 @@ function setup() { "use strict";
 	var p2 = [200, 200];
 	var d2 = [0, 300];
 
+	// Randomize a list of n Points to plot the Hermite Curve
+	var arrayHermiteCurvesPoints = [];
+	arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // first boorang point set at alient position
+	for(let i= 1; i< numberOfHermiteCurves; i++){ // start at 1 because boomerang point starts at alien position
+		var xBound = Math.random()* (canvas.width - 0) + 0;
+		var yBound = Math.random()* (canvas.height - 0) + 0;
+		arrayHermiteCurvesPoints[i] = [xBound, yBound];
+	}
+
+	var arrayHermiteCurvesDerivatives = [];
+	for(let i= 0; i< numberOfHermiteCurves; i++){
+		var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
+		var yBound = Math.random()* (500 - (-500)) + (-500);
+		arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
+	}
+
+	// Generate P
+	var arrP = [];
+	for(let i=0; i< numberOfHermiteCurves; i++){
+		arrP[i] = []; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
+	}
 
 	var P0 = [p0, d0, p1, d1];
 	var P1 = [p1, d1, p2, d2];
