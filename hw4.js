@@ -106,7 +106,7 @@ function setup() { "use strict";
 	// Boomerang button variable
 	var fireButton = document.getElementById('fireButton');
 
-	// Trajectory of Alien target
+	// This function defines a Basis function of the Hermite Cubic trajectory of the boomerang
 	var Hermite = function(t){
 		return[
 			2*t*t*t-3*t*t+1,
@@ -116,6 +116,7 @@ function setup() { "use strict";
 		];
 	}
 
+	// This function defines the calculation for uBP 
 	function Cubic(basis, P, t){
 		var b = basis(t);
 		var result = vec2.create();
@@ -126,27 +127,18 @@ function setup() { "use strict";
 		return result;
 	}
 
-	// P of connected Hermite cubics
-	// // Point and tangent 0
-	// var p0 = [0,0];
-	// var d0 = [1,3];
-
-	// // Point and tangent 1
-	// var p1 = [100,100];
-	// var d1 = [-1, 300];
-
-	// // Point and tangent 2
-	// var p2 = [200, 200];
-	// var d2 = [0, 300];
-
+	// This function checks if the boomerang is fired
 	function boomerangRelease(){
 		fireButtonState = true;
 	}
 
+	// Variables that stores the generated Hermite Curves
 	var arrayHermiteCurvesPoints = [];
 	var arrayHermiteCurvesDerivatives = [];
 	var arrP = [];
 	var arrCurves = [];
+
+	// This function randomizes the Hermite Curve that is generated after it the Curve is closed
 	function randomizeHermiteCurve(){
 		// Randomize a list of n Points to plot the Hermite Curve
 		// Plot randomized points for Hermite Curve
@@ -157,7 +149,7 @@ function setup() { "use strict";
 			var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
 			arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
 		}
-		arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
+		arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // closes the curve
 
 		// Plot randomized derivatives for Hermite Curve
 		arrayHermiteCurvesDerivatives = [];
@@ -167,7 +159,7 @@ function setup() { "use strict";
 			arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
 		}
 
-		// Generate P
+		// Generates P for uBP
 		arrP = [];
 		for(let i=0; i< numberOfHermiteCurves-1; i++){
 			arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
@@ -180,43 +172,8 @@ function setup() { "use strict";
 		}
 	}
 
-	// // Randomize a list of n Points to plot the Hermite Curve
-	// // Plot randomized points for Hermite Curve
-	// var arrayHermiteCurvesPoints = [];
-	// arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // sets boomerang position to start at alien position
-	// for(let i= 1; i< numberOfHermiteCurves - 1; i++){ // updates the remaining boomerang points
-	// 	var xBound = Math.random()* ((canvas.width - 50) - 10) + 10;
-	// 	var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
-	// 	arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
-	// }
-	// arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
 
-	// // Plot randomized derivatives for Hermite Curve
-	// var arrayHermiteCurvesDerivatives = [];
-	// for(let i= 0; i< numberOfHermiteCurves; i++){
-	// 	var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
-	// 	var yBound = Math.random()* (500 - (-500)) + (-500);
-	// 	arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
-	// }
-
-	// // Generate P
-	// var arrP = [];
-	// for(let i=0; i< numberOfHermiteCurves-1; i++){
-	// 	arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
-	// }
-
-	// // var P0 = [p0, d0, p1, d1];
-	// // var P1 = [p1, d1, p2, d2];
-
-	// // var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
-	// // var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
-
-	// var arrCurves = [];
-	// for(let i=0; i< numberOfHermiteCurves-1; i++){
-	// 	var CurveN = function(t_){return Cubic(Hermite, arrP[i], t_)};
-	// 	arrCurves[i] = CurveN;
-	// }
-
+	// Generates a complete Hermite curve at a start of the program
 	randomizeHermiteCurve();
 
 
@@ -678,6 +635,7 @@ function setup() { "use strict";
 				clearInterval(targetAnimatorTracker);
 				clearInterval(updateAnimatorTracker);
 				clearInterval(rockAnimatorTracker);
+				clearInterval(sunMoonAnimatorTracker);
 
 				context.save();
 				context.translate(-50, 0);
@@ -685,6 +643,8 @@ function setup() { "use strict";
 				context.font = '70px serif';
 				context.fillText('LEVEL CLEARED! \nScore: 10/10', 10, 90);
 				context.restore();
+
+
 
 			}
 
@@ -693,6 +653,7 @@ function setup() { "use strict";
 				clearInterval(targetAnimatorTracker);
 				clearInterval(updateAnimatorTracker);
 				clearInterval(rockAnimatorTracker);
+				clearInterval(sunMoonAnimatorTracker);
 
 				context.save();
 				context.translate(-50, 0);
@@ -703,6 +664,73 @@ function setup() { "use strict";
 
 			}
 
+		}
+
+		// This function draws the alien ship
+		function DrawAlienShip(){
+
+			// Draw ship halo
+			context.save();
+			context.beginPath();
+			context.fillStyle = "rgb(253,253,150)";
+			context.fillRect(alienStartPosX-6, alienStartPosY+5, 20, 50);
+			context.restore();
+
+			// Draw ship thrusters
+			context.save();
+			context.beginPath();
+			context.fillStyle = "black";
+			context.fillRect(alienStartPosX-11, alienStartPosY+5, 30, 10);
+			context.restore();
+
+			// Draw ship body
+			context.save();
+			context.beginPath();
+			context.ellipse(alienStartPosX, alienStartPosY+5, 70, 25, Math.PI, 0, 1 * Math.PI);
+			context.stroke();
+			context.fillStyle = "grey";
+			context.fill();
+			context.restore();
+
+			// Draw ship bottom body
+			context.save();
+			context.beginPath();
+			context.ellipse(alienStartPosX, alienStartPosY+5, 70, 5, Math.PI*180, 0, 1 * Math.PI);
+			context.stroke();
+			context.fillStyle = "grey";
+			context.fill();
+			context.restore();
+		
+			// Draw cockpit
+			context.save();
+			context.beginPath();
+			context.ellipse(alienStartPosX, alienStartPosY-15, 30, 40, Math.PI, 0, 1 * Math.PI);
+			context.stroke();
+			context.fillStyle = "rgb(208, 255, 255)";
+			context.fill();
+			context.restore();
+
+			// Draw cockpit reflection
+			context.save();
+			context.beginPath();
+			context.ellipse(alienStartPosX, alienStartPosY-15, 15, 35, Math.PI, 0, 1 * Math.PI);
+			context.fillStyle = "rgb(120, 255, 255)";
+			context.fill();
+			context.restore();
+
+			// Draw ornaments
+			context.save();
+			context.beginPath();
+			context.arc(alienStartPosX- 50, alienStartPosY-3, 5, 0, 2 * Math.PI);
+			context.arc(alienStartPosX- 40, alienStartPosY-1, 5, 0, 2 * Math.PI);
+			context.arc(alienStartPosX- 30, alienStartPosY, 5, 0, 2 * Math.PI);
+
+			context.arc(alienStartPosX+ 50, alienStartPosY-3, 5, 0, 2 * Math.PI);
+			context.arc(alienStartPosX+ 40, alienStartPosY-1, 5, 0, 2 * Math.PI);
+			context.arc(alienStartPosX+ 30, alienStartPosY, 5, 0, 2 * Math.PI);
+			context.fillStyle = "purple";
+			context.fill();
+			context.restore();
 		}
 
 		
@@ -716,15 +744,13 @@ function setup() { "use strict";
 
 		DrawGrass();
 
+		// Checks if trajectory should be drawn onto the canvas
 		if(drawBoomerangTrajectoryStatus == true){
 			for(let i=0; i< numberOfHermiteCurves-1; i++){
 				DrawBoomerangTrajectory(0.0, 1.0, 100, arrCurves[i]);
 			}
 	  	}
-		// Checks if loading screen text should be drawn
-		if(isReleased == false && fireButtonState == false){
-			DrawLoadingScreen();
-		}
+		
 		
 		
     	DrawSling();	
@@ -733,8 +759,14 @@ function setup() { "use strict";
 		DrawWings();
 		DrawTarget();
 		DrawBoomerang();
+		DrawAlienShip();
 		DrawRockAndTargetCollisionDetectionText();
 		DrawPlatform();
+
+		// Checks if loading screen text should be drawn
+		if(isReleased == false && fireButtonState == false){
+			DrawLoadingScreen();
+		}
 		
 		context.restore();
     
@@ -747,6 +779,7 @@ function setup() { "use strict";
 	// This function animates the boomerang
 	function boomerangAnimator(){
 
+		// Checks if the boomerang is fired
 		if(fireButtonState == false){
 			boomerangDegRotation = 0;
 			return;
@@ -771,8 +804,10 @@ function setup() { "use strict";
 
 	}
 	
+	// This function animates the trajectory of the boomerang
 	function boomrangPathAnimator(){
 
+		// Checks if the boomerang is fired
 		if(fireButtonState == false){
 			return;
 		}
@@ -790,11 +825,13 @@ function setup() { "use strict";
 		draw();
 
 
+		// Checks if the current interval of the Hermite Cubic has been completed
 		if(boomerangCurrentInterval >= boomerangMaxInterval){
 			// Change curve
 			boomerangReferredCurveIndex += 1;
 			boomerangCurrentInterval = 0;
 
+			// Checks if Hermite curve sketch is complete
 			if(boomerangReferredCurveIndex >= numberOfHermiteCurves-1){
 
 				boomerangReferredCurveIndex = 0;
@@ -859,10 +896,10 @@ function setup() { "use strict";
 		distanceChanged = distanceChanged * -1;
 		startingGrassX = startingGrassX + distanceChanged;
 
-		if(rockPosX >=600 || rockPosX <= -50 || rockPosY >= 279){
+		// if(rockPosX >=600 || rockPosX <= -50 || rockPosY >= 279){
 
-			clearInterval(grassAnimatorTracker);
-		}
+		// 	clearInterval(grassAnimatorTracker);
+		// }
 		
 	}
 
@@ -916,6 +953,10 @@ function setup() { "use strict";
 
 	// This function tracks when the sling button is pressed
 	function slingRelease(){
+
+		if(rockPosX >=600 || rockPosX <= -50 || rockPosY >= 279){
+			return;
+		}
 		
 		// This function defines animation of sling string when it is released
 		function slingAnimation(){
@@ -959,14 +1000,10 @@ function setup() { "use strict";
 	// its own rendering speed, which is different from what is defined here
 	function callAllAnimators(){
 		//grassAnimator();
-		sunAndMoonAnimator();
+		//sunAndMoonAnimator();
 		//targetAnimator();
 
 		draw();
-		if(rockPosX >=600 || rockPosX <= -50 || rockPosY >= 279){
-
-			clearInterval(updateAnimatorTracker);
-		}
 
 	}
   	
@@ -984,11 +1021,11 @@ function setup() { "use strict";
 
 
 	grassAnimatorTracker = setInterval(grassAnimator, speedOfGrass); // Starts grass animator 
-	//sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
+	sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
 	boomerangAnimatorTracker = setInterval(boomerangAnimator, speedOfBoomerang);
 	boomerangPathAnimatorTracker = setInterval(boomrangPathAnimator, speedOfBoomerangPath);
-	document.body.onkeyup = function(e){
+	document.body.onkeyup = function(e){ // Spacebar used to fire boomerang
 		if(e.keyCode == 32){
 			if(drawBoomerangTrajectoryStatus == false && fireButtonState == true){
 				drawBoomerangTrajectoryStatus = true;
