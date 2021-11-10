@@ -86,18 +86,23 @@ function setup() { "use strict";
 	var alienStartPosY = 120;
 
 	// Boomerang variables
-	var numberOfHermiteCurves = 5;
+	var numberOfHermiteCurves = 6;
 	var boomerangPosX = alienStartPosX;
 	var boomerangPosY = alienStartPosY;
 	var boomerangDegRotation = 0;
 	var boomerangAnimatorTracker = null;
-	var speedOfBoomerang = 50;
+	var speedOfBoomerang = 25;
 
 	var boomerangCurrentInterval = 0;
 	var boomerangMaxInterval = 100;
 	var boomerangReferredCurveIndex = 0;
 	var boomerangPathAnimatorTracker = null;
-	var speedOfBoomerangPath = 40;
+	var speedOfBoomerangPath = 30;
+
+	var fireButtonState = false;
+
+	// Boomerang button variable
+	var fireButton = document.getElementById('fireButton');
 
 	// Trajectory of Alien target
 	var Hermite = function(t){
@@ -132,42 +137,85 @@ function setup() { "use strict";
 	// var p2 = [200, 200];
 	// var d2 = [0, 300];
 
-	// Randomize a list of n Points to plot the Hermite Curve
-	// Plot randomized points for Hermite Curve
+	function boomerangRelease(){
+		fireButtonState = true;
+	}
+
 	var arrayHermiteCurvesPoints = [];
-	arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // sets boomerang position to start at alien position
-	for(let i= 1; i< numberOfHermiteCurves - 1; i++){ // updates the remaining boomerang points
-		var xBound = Math.random()* ((canvas.width - 50) - 10) + 10;
-		var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
-		arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
-	}
-	arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
-
-	// Plot randomized derivatives for Hermite Curve
 	var arrayHermiteCurvesDerivatives = [];
-	for(let i= 0; i< numberOfHermiteCurves; i++){
-		var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
-		var yBound = Math.random()* (500 - (-500)) + (-500);
-		arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
-	}
-
-	// Generate P
 	var arrP = [];
-	for(let i=0; i< numberOfHermiteCurves-1; i++){
-		arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
-	}
-
-	// var P0 = [p0, d0, p1, d1];
-	// var P1 = [p1, d1, p2, d2];
-
-	// var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
-	// var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
-
 	var arrCurves = [];
-	for(let i=0; i< numberOfHermiteCurves-1; i++){
-		var CurveN = function(t_){return Cubic(Hermite, arrP[i], t_)};
-		arrCurves[i] = CurveN;
+	function randomizeHermiteCurve(){
+		// Randomize a list of n Points to plot the Hermite Curve
+		// Plot randomized points for Hermite Curve
+		arrayHermiteCurvesPoints = [];
+		arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // sets boomerang position to start at alien position
+		for(let i= 1; i< numberOfHermiteCurves - 1; i++){ // updates the remaining boomerang points
+			var xBound = Math.random()* ((canvas.width - 50) - 10) + 10;
+			var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
+			arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
+		}
+		arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
+
+		// Plot randomized derivatives for Hermite Curve
+		arrayHermiteCurvesDerivatives = [];
+		for(let i= 0; i< numberOfHermiteCurves; i++){
+			var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
+			var yBound = Math.random()* (500 - (-500)) + (-500);
+			arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
+		}
+
+		// Generate P
+		arrP = [];
+		for(let i=0; i< numberOfHermiteCurves-1; i++){
+			arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
+		}
+
+		arrCurves = [];
+		for(let i=0; i< numberOfHermiteCurves-1; i++){
+			var CurveN = function(t_){return Cubic(Hermite, arrP[i], t_)};
+			arrCurves[i] = CurveN;
+		}
 	}
+
+	// // Randomize a list of n Points to plot the Hermite Curve
+	// // Plot randomized points for Hermite Curve
+	// var arrayHermiteCurvesPoints = [];
+	// arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // sets boomerang position to start at alien position
+	// for(let i= 1; i< numberOfHermiteCurves - 1; i++){ // updates the remaining boomerang points
+	// 	var xBound = Math.random()* ((canvas.width - 50) - 10) + 10;
+	// 	var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
+	// 	arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
+	// }
+	// arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
+
+	// // Plot randomized derivatives for Hermite Curve
+	// var arrayHermiteCurvesDerivatives = [];
+	// for(let i= 0; i< numberOfHermiteCurves; i++){
+	// 	var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
+	// 	var yBound = Math.random()* (500 - (-500)) + (-500);
+	// 	arrayHermiteCurvesDerivatives[i] = [xBound, yBound];
+	// }
+
+	// // Generate P
+	// var arrP = [];
+	// for(let i=0; i< numberOfHermiteCurves-1; i++){
+	// 	arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
+	// }
+
+	// // var P0 = [p0, d0, p1, d1];
+	// // var P1 = [p1, d1, p2, d2];
+
+	// // var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
+	// // var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
+
+	// var arrCurves = [];
+	// for(let i=0; i< numberOfHermiteCurves-1; i++){
+	// 	var CurveN = function(t_){return Cubic(Hermite, arrP[i], t_)};
+	// 	arrCurves[i] = CurveN;
+	// }
+
+	randomizeHermiteCurve();
 
 
 	// This function defines a drawings on the canvas
@@ -221,7 +269,7 @@ function setup() { "use strict";
 		}
 
 		// This function draw alien trajectory
-		function DrawAlienTrajectory(t_begin, t_end, intervals, C){
+		function DrawBoomerangTrajectory(t_begin, t_end, intervals, C){
 			context.save();
 			context.strokeStyle = "black";
 			context.beginPath();
@@ -650,7 +698,7 @@ function setup() { "use strict";
 
 		DrawGrass();
 		for(let i=0; i< numberOfHermiteCurves-1; i++){
-			DrawAlienTrajectory(0.0, 1.0, 100, arrCurves[i]);
+			DrawBoomerangTrajectory(0.0, 1.0, 100, arrCurves[i]);
 		}
 
 		// Checks if loading screen text should be drawn
@@ -658,14 +706,15 @@ function setup() { "use strict";
 			DrawLoadingScreen();
 		}
 		
-		DrawBoomerang();
+		
     	DrawSling();	
 		DrawAimAssist();
 		DrawSlingShot();
-		DrawPlatform();
 		DrawWings();
 		DrawTarget();
+		DrawBoomerang();
 		DrawRockAndTargetCollisionDetectionText();
+		DrawPlatform();
 		
 		context.restore();
     
@@ -677,6 +726,12 @@ function setup() { "use strict";
 
 	// This function animates the boomerang
 	function boomerangAnimator(){
+
+		if(fireButtonState == false){
+			boomerangDegRotation = 0;
+			return;
+		}
+
 		// Rotate boomerang at each call
 		boomerangDegRotation = boomerangDegRotation + 20;
 		if(boomerangDegRotation >= 360){
@@ -686,15 +741,21 @@ function setup() { "use strict";
 		draw();
 
 		// Boomerang stops upon collision of target
-		if((targetPosX - 30 <= boomerangPosX && targetPosX + 30 >= rockPosX) && (targetPosY - 30 <= boomerangPosY && targetPosY + 30 >= boomerangPosY)){
+		if((targetPosX - 20 <= boomerangPosX && targetPosX + 20 >= boomerangPosX) && (targetPosY - 20 <= boomerangPosY && targetPosY + 20 >= boomerangPosY)){
 
+			clearInterval(boomerangPathAnimatorTracker);
 			clearInterval(boomerangAnimatorTracker);
 			clearInterval(updateAnimatorTracker);
+			clearInterval(targetAnimatorTracker);
 		}
 
 	}
 	
 	function boomrangPathAnimator(){
+
+		if(fireButtonState == false){
+			return;
+		}
 
 		// Update position of boomerang
 		boomerangCurrentInterval = boomerangCurrentInterval + 1;
@@ -706,13 +767,6 @@ function setup() { "use strict";
 		boomerangPosX = currentCurve(t)[0];
 		boomerangPosY = currentCurve(t)[1];
 
-		//C(t_begin)[0], C(t_begin)[1]);
-
-		
-
-		//console.log(boomerangPosX);
-		//console.log(boomerangPosY);
-
 		draw();
 
 
@@ -722,16 +776,22 @@ function setup() { "use strict";
 			boomerangCurrentInterval = 0;
 
 			if(boomerangReferredCurveIndex >= numberOfHermiteCurves-1){
+
 				boomerangReferredCurveIndex = 0;
+				fireButtonState = false;
+				randomizeHermiteCurve();
+				
 			}
 
 		}
 
 		// Boomerang stops upon collision of target
-		if((targetPosX - 30 <= boomerangPosX && targetPosX + 30 >= rockPosX) && (targetPosY - 30 <= boomerangPosY && targetPosY + 30 >= boomerangPosY)){
+		if((targetPosX - 20 <= boomerangPosX && targetPosX + 20 >= boomerangPosX) && (targetPosY - 20 <= boomerangPosY && targetPosY + 20 >= boomerangPosY)){
 
 			clearInterval(boomerangPathAnimatorTracker);
+			clearInterval(boomerangAnimatorTracker);
 			clearInterval(updateAnimatorTracker);
+			clearInterval(targetAnimatorTracker);
 		}
 
 	}
@@ -832,6 +892,7 @@ function setup() { "use strict";
 		
 	}	
 
+
 	// This function tracks when the sling button is pressed
 	function slingRelease(){
 		
@@ -897,7 +958,10 @@ function setup() { "use strict";
 	// Event listeners
 	sliderX.addEventListener("input", empty); // Slider that reflects the X position of sling string
   	sliderY.addEventListener("input", empty); // Slider that reflects the Y position of sling string
-	slingButton.addEventListener("click", slingRelease); // Button that fires the sling		
+	slingButton.addEventListener("click", slingRelease); // Button that fires the sling	
+	fireButton.addEventListener("click", boomerangRelease);
+
+
 	grassAnimatorTracker = setInterval(grassAnimator, speedOfGrass); // Starts grass animator 
 	//sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
