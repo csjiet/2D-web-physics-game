@@ -89,6 +89,9 @@ function setup() { "use strict";
 	var numberOfHermiteCurves = 5;
 	var boomerangPosX = alienStartPosX;
 	var boomerangPosY = alienStartPosY;
+	var boomerangDegRotation = 0;
+	var boomerangAnimatorTracker = null;
+	var speedOfBoomerang = 50;
 
 	// Trajectory of Alien target
 	var Hermite = function(t){
@@ -177,37 +180,38 @@ function setup() { "use strict";
 		function DrawBoomerang(){
 			
 			
-			
+			function DrawBoomerangPicture(){
+				context.save();
+				context.beginPath();
+				context.fillStyle = "brown";
+				//context.translate(boomerangPosX, boomerangPosY);
+				context.rotate(0 * Math.PI/ 180);
+				context.fillRect(0, 0, 25, 5);
+				context.restore();
+
+				context.save();
+				context.beginPath();
+				context.fillStyle = "brown";
+				//context.translate(boomerangPosX, boomerangPosY+5);
+				context.rotate(90 * Math.PI/ 180);
+				context.fillRect(0, 0-5, 25, 5);
+				context.restore();
+
+				context.save();
+				context.beginPath();
+				//context.translate(boomerangPosX-2, boomerangPosY+2);
+				context.arc(0+3, 0+2, 5, 0, 2 * Math.PI);
+				context.fillStyle = "orange";
+				context.fill();
+				context.restore();
+			}
+
 			context.save();
-			context.beginPath();
-			context.fillStyle = "brown";
 			context.translate(boomerangPosX, boomerangPosY);
-			context.rotate(0 * Math.PI/ 180);
-			context.fillRect(0, 0, 30, 5);
+			context.rotate(boomerangDegRotation * Math.PI/ 180);
+			DrawBoomerangPicture();
 			context.restore();
 
-			context.save();
-			context.beginPath();
-			context.fillStyle = "brown";
-			context.translate(boomerangPosX, boomerangPosY+5);
-			context.rotate(90 * Math.PI/ 180);
-			context.fillRect(0, 0, 30, 5);
-			context.restore();
-
-			context.save();
-			context.beginPath();
-			context.translate(boomerangPosX-2, boomerangPosY+2);
-			context.arc(0, 0, 5, 0, 2 * Math.PI);
-			context.fillStyle = "orange";
-			context.fill();
-			context.restore();
-
-			
-			
-
-			
-
-			
 		}
 
 		// This function draw alien trajectory
@@ -240,7 +244,6 @@ function setup() { "use strict";
 			context.strokeRect(80, 200-10, 10, 45); // added 10 to 210 and 45 (above too)
 			
 			DrawRock();
-
 
 			// sling pillar 2 (left)
 			context.fillStyle = "red";
@@ -665,6 +668,25 @@ function setup() { "use strict";
 
 
 	// Animations
+
+	// This function animates the boomerang
+	function boomerangAnimator(){
+		// Rotate boomerang at each call
+		boomerangDegRotation = boomerangDegRotation + 20;
+		if(boomerangDegRotation >= 360){
+			boomerangDegRotation = 0;
+		}
+
+		draw();
+
+		// Boomerang stops upon collision of target
+		if((targetPosX - 30 <= boomerangPosX && targetPosX + 30 >= rockPosX) && (targetPosY - 30 <= boomerangPosY && targetPosY + 30 >= boomerangPosY)){
+
+			clearInterval(boomerangAnimatorTracker);
+			clearInterval(updateAnimatorTracker);
+		}
+
+	}
 	
 	// This function animates the position of the target
 	function targetAnimator(){
@@ -831,6 +853,7 @@ function setup() { "use strict";
 	grassAnimatorTracker = setInterval(grassAnimator, speedOfGrass); // Starts grass animator 
 	//sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
+	boomerangAnimatorTracker = setInterval(boomerangAnimator, speedOfBoomerang);
 
 	// Updates drawn frame
 	updateAnimatorTracker = setInterval(callAllAnimators, speedOfRender);
