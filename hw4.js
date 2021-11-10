@@ -87,7 +87,7 @@ function setup() { "use strict";
 			t*t*t-2*t*t+t,
 			-2*t*t*t+3*t*t,
 			t*t*t-t*t
-		]
+		];
 	}
 
 	function Cubic(basis, P, t){
@@ -106,12 +106,12 @@ function setup() { "use strict";
 	var d0 = [1,3];
 
 	// Point and tangent 1
-	var p1 = [1,1];
-	var d1 = [-1, 3];
+	var p1 = [100,100];
+	var d1 = [-1, 300];
 
 	// Point and tangent 2
-	var p2 = [2, 2];
-	var d2 = [0, 3];
+	var p2 = [200, 200];
+	var d2 = [0, 300];
 
 
 	var P0 = [p0, d0, p1, d1];
@@ -138,11 +138,12 @@ function setup() { "use strict";
 			context.save();
 			context.strokeStyle = "black";
 			context.beginPath();
-			context.moveTo(Curve1(t_begin));
+			context.moveTo(C(t_begin)[0], C(t_begin)[1]);
 			for(var i=1; i<= intervals; i++){
 				var t = ((intervals-i)/ intervals) * t_begin+ (i/ intervals)* t_end;
-				context.lineTo(C(t));
+				context.lineTo(C(t)[0], C(t)[1]);
 			}
+
 
 			context.stroke();
 			context.restore();
@@ -559,6 +560,7 @@ function setup() { "use strict";
 		
 		dayNightChanger();
 		DrawAlienTrajectory(0.0, 1.0, 100, Curve1);
+		DrawAlienTrajectory(0.0, 1.0, 100, Curve2);
 		// Checks if loading screen text should be drawn
 		if(isReleased == false){
 			DrawLoadingScreen();
