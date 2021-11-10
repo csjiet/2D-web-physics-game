@@ -93,6 +93,12 @@ function setup() { "use strict";
 	var boomerangAnimatorTracker = null;
 	var speedOfBoomerang = 50;
 
+	var boomerangCurrentInterval = 0;
+	var boomerangMaxInterval = 100;
+	var boomerangReferredCurveIndex = 0;
+	var boomerangPathAnimatorTracker = null;
+	var speedOfBoomerangPath = 40;
+
 	// Trajectory of Alien target
 	var Hermite = function(t){
 		return[
@@ -688,6 +694,48 @@ function setup() { "use strict";
 
 	}
 	
+	function boomrangPathAnimator(){
+
+		// Update position of boomerang
+		boomerangCurrentInterval = boomerangCurrentInterval + 1;
+
+		// Get the x, y coordinates of the Hermite curve C(t)[0], C(t)[1]
+		// Get current curve
+		var currentCurve = arrCurves[boomerangReferredCurveIndex];
+		var t = ((boomerangMaxInterval-boomerangCurrentInterval)/ boomerangMaxInterval) * 0.0+ (boomerangCurrentInterval/ boomerangMaxInterval)* 1.0;
+		boomerangPosX = currentCurve(t)[0];
+		boomerangPosY = currentCurve(t)[1];
+
+		//C(t_begin)[0], C(t_begin)[1]);
+
+		
+
+		//console.log(boomerangPosX);
+		//console.log(boomerangPosY);
+
+		draw();
+
+
+		if(boomerangCurrentInterval >= boomerangMaxInterval){
+			// Change curve
+			boomerangReferredCurveIndex += 1;
+			boomerangCurrentInterval = 0;
+
+			if(boomerangReferredCurveIndex >= numberOfHermiteCurves-1){
+				boomerangReferredCurveIndex = 0;
+			}
+
+		}
+
+		// Boomerang stops upon collision of target
+		if((targetPosX - 30 <= boomerangPosX && targetPosX + 30 >= rockPosX) && (targetPosY - 30 <= boomerangPosY && targetPosY + 30 >= boomerangPosY)){
+
+			clearInterval(boomerangPathAnimatorTracker);
+			clearInterval(updateAnimatorTracker);
+		}
+
+	}
+	
 	// This function animates the position of the target
 	function targetAnimator(){
 
@@ -854,6 +902,7 @@ function setup() { "use strict";
 	//sunMoonAnimatorTracker = setInterval(sunAndMoonAnimator, speedOfSunMoonRotation);
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
 	boomerangAnimatorTracker = setInterval(boomerangAnimator, speedOfBoomerang);
+	boomerangPathAnimatorTracker = setInterval(boomrangPathAnimator, speedOfBoomerangPath);
 
 	// Updates drawn frame
 	updateAnimatorTracker = setInterval(callAllAnimators, speedOfRender);
