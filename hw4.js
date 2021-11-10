@@ -86,6 +86,8 @@ function setup() { "use strict";
 	var alienStartPosY = 120;
 
 	// Boomerang variables
+	var drawBoomerangTrajectoryStatus = false;
+
 	var numberOfHermiteCurves = 6;
 	var boomerangPosX = alienStartPosX;
 	var boomerangPosY = alienStartPosY;
@@ -697,10 +699,12 @@ function setup() { "use strict";
 		// DrawAlienTrajectory(0.0, 1.0, 100, Curve2);
 
 		DrawGrass();
-		for(let i=0; i< numberOfHermiteCurves-1; i++){
-			DrawBoomerangTrajectory(0.0, 1.0, 100, arrCurves[i]);
-		}
 
+		if(drawBoomerangTrajectoryStatus == true){
+			for(let i=0; i< numberOfHermiteCurves-1; i++){
+				DrawBoomerangTrajectory(0.0, 1.0, 100, arrCurves[i]);
+			}
+	  	}
 		// Checks if loading screen text should be drawn
 		if(isReleased == false){
 			DrawLoadingScreen();
@@ -779,6 +783,7 @@ function setup() { "use strict";
 
 				boomerangReferredCurveIndex = 0;
 				fireButtonState = false;
+				drawBoomerangTrajectoryStatus = false;
 				randomizeHermiteCurve();
 				
 			}
@@ -967,6 +972,15 @@ function setup() { "use strict";
 	targetAnimatorTracker = setInterval(targetAnimator, speedOfTarget);
 	boomerangAnimatorTracker = setInterval(boomerangAnimator, speedOfBoomerang);
 	boomerangPathAnimatorTracker = setInterval(boomrangPathAnimator, speedOfBoomerangPath);
+	document.body.onkeyup = function(e){
+		if(e.keyCode == 32){
+			if(drawBoomerangTrajectoryStatus == false && fireButtonState == true){
+				drawBoomerangTrajectoryStatus = true;
+			}else{
+				drawBoomerangTrajectoryStatus = false;
+			}
+		}
+	}
 
 	// Updates drawn frame
 	updateAnimatorTracker = setInterval(callAllAnimators, speedOfRender);
