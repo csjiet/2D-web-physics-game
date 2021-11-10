@@ -79,13 +79,16 @@ function setup() { "use strict";
 	var rightWingToInnerJointRotation = 0;
 	var rightWingToOuterJointRotation = rightWingToInnerJointRotation + innerAndOuterWingFlex;
 
-	// Boomerang variables
-	var numberOfHermiteCurves = 5;
+	
 
 	// Alien varibles
-	var alienStartPosX = 0;
-	var alienStartPosY = 0;
+	var alienStartPosX = 80;
+	var alienStartPosY = 120;
 
+	// Boomerang variables
+	var numberOfHermiteCurves = 5;
+	var boomerangPosX = alienStartPosX;
+	var boomerangPosY = alienStartPosY;
 
 	// Trajectory of Alien target
 	var Hermite = function(t){
@@ -108,27 +111,30 @@ function setup() { "use strict";
 	}
 
 	// P of connected Hermite cubics
-	// Point and tangent 0
-	var p0 = [0,0];
-	var d0 = [1,3];
+	// // Point and tangent 0
+	// var p0 = [0,0];
+	// var d0 = [1,3];
 
-	// Point and tangent 1
-	var p1 = [100,100];
-	var d1 = [-1, 300];
+	// // Point and tangent 1
+	// var p1 = [100,100];
+	// var d1 = [-1, 300];
 
-	// Point and tangent 2
-	var p2 = [200, 200];
-	var d2 = [0, 300];
+	// // Point and tangent 2
+	// var p2 = [200, 200];
+	// var d2 = [0, 300];
 
 	// Randomize a list of n Points to plot the Hermite Curve
+	// Plot randomized points for Hermite Curve
 	var arrayHermiteCurvesPoints = [];
-	arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // first boorang point set at alient position
-	for(let i= 1; i< numberOfHermiteCurves; i++){ // start at 1 because boomerang point starts at alien position
-		var xBound = Math.random()* (canvas.width - 0) + 0;
-		var yBound = Math.random()* (canvas.height - 0) + 0;
-		arrayHermiteCurvesPoints[i] = [xBound, yBound];
+	arrayHermiteCurvesPoints[0] = [alienStartPosX, alienStartPosY]; // sets boomerang position to start at alien position
+	for(let i= 1; i< numberOfHermiteCurves - 1; i++){ // updates the remaining boomerang points
+		var xBound = Math.random()* ((canvas.width - 50) - 10) + 10;
+		var yBound = Math.random()* ((canvas.height - 50) - 10) + 10;
+		arrayHermiteCurvesPoints[i] = [xBound, yBound]; // sets boomerang position to return to alien 
 	}
+	arrayHermiteCurvesPoints[numberOfHermiteCurves-1] = [alienStartPosX, alienStartPosY]; // close curve
 
+	// Plot randomized derivatives for Hermite Curve
 	var arrayHermiteCurvesDerivatives = [];
 	for(let i= 0; i< numberOfHermiteCurves; i++){
 		var xBound = Math.random()* (500 - (-500)) + (-500); // limit derivatives to -500 to 500
@@ -138,15 +144,21 @@ function setup() { "use strict";
 
 	// Generate P
 	var arrP = [];
-	for(let i=0; i< numberOfHermiteCurves; i++){
-		arrP[i] = []; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
+	for(let i=0; i< numberOfHermiteCurves-1; i++){
+		arrP[i] = [arrayHermiteCurvesPoints[i], arrayHermiteCurvesDerivatives[i], arrayHermiteCurvesPoints[i+1], arrayHermiteCurvesDerivatives[i+1]]; // ADD STARTING POINT OF ALIEN FIRST, THEN ADD ALL REMAINING HERMITE CURVE POINTS
 	}
 
-	var P0 = [p0, d0, p1, d1];
-	var P1 = [p1, d1, p2, d2];
+	// var P0 = [p0, d0, p1, d1];
+	// var P1 = [p1, d1, p2, d2];
 
-	var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
-	var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
+	// var Curve1 = function(t_){return Cubic(Hermite, P0, t_)};
+	// var Curve2 = function(t_){return Cubic(Hermite, P1, t_)};
+
+	var arrCurves = [];
+	for(let i=0; i< numberOfHermiteCurves-1; i++){
+		var CurveN = function(t_){return Cubic(Hermite, arrP[i], t_)};
+		arrCurves[i] = CurveN;
+	}
 
 
 	// This function defines a drawings on the canvas
@@ -160,6 +172,43 @@ function setup() { "use strict";
 
 		context.save();
 		context.translate(50,0);
+
+		// This function draws boomerang
+		function DrawBoomerang(){
+			
+			
+			
+			context.save();
+			context.beginPath();
+			context.fillStyle = "brown";
+			context.translate(boomerangPosX, boomerangPosY);
+			context.rotate(0 * Math.PI/ 180);
+			context.fillRect(0, 0, 30, 5);
+			context.restore();
+
+			context.save();
+			context.beginPath();
+			context.fillStyle = "brown";
+			context.translate(boomerangPosX, boomerangPosY+5);
+			context.rotate(90 * Math.PI/ 180);
+			context.fillRect(0, 0, 30, 5);
+			context.restore();
+
+			context.save();
+			context.beginPath();
+			context.translate(boomerangPosX-2, boomerangPosY+2);
+			context.arc(0, 0, 5, 0, 2 * Math.PI);
+			context.fillStyle = "orange";
+			context.fill();
+			context.restore();
+
+			
+			
+
+			
+
+			
+		}
 
 		// This function draw alien trajectory
 		function DrawAlienTrajectory(t_begin, t_end, intervals, C){
@@ -587,13 +636,20 @@ function setup() { "use strict";
 		context.save();
 		
 		dayNightChanger();
-		DrawAlienTrajectory(0.0, 1.0, 100, Curve1);
-		DrawAlienTrajectory(0.0, 1.0, 100, Curve2);
+		// DrawAlienTrajectory(0.0, 1.0, 100, Curve1);
+		// DrawAlienTrajectory(0.0, 1.0, 100, Curve2);
+
+		DrawGrass();
+		for(let i=0; i< numberOfHermiteCurves-1; i++){
+			DrawAlienTrajectory(0.0, 1.0, 100, arrCurves[i]);
+		}
+
 		// Checks if loading screen text should be drawn
 		if(isReleased == false){
 			DrawLoadingScreen();
 		}
-		DrawGrass();
+		
+		DrawBoomerang();
     	DrawSling();	
 		DrawAimAssist();
 		DrawSlingShot();
