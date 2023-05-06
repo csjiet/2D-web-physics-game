@@ -1,7 +1,7 @@
 # Angry Boulder and Alien
 
-<img src= "./night.png" width = 200>
-<img src= "./morning.png" width = 200>
+<img src= "./night.png" width = 600>
+<img src= "./morning.png" width = 600>
 
 > A 2D web game, complete with random bezier curves and projectile motion
 - **Platform**: MacOS, Safari, Chrome;
