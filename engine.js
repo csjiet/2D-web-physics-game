@@ -1,6 +1,5 @@
 	
 function setup() { "use strict";
-  	
 // Variables
 	var sliderLength = 100; // length of slider x and y
 	var canvas = document.getElementById('myCanvas');
